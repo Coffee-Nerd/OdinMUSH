@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- MuClient version 5.07-pre -->
+<!-- Written by Nick Gammon -->
+<!-- Home Page: http://www.mushclient.com/ -->
+
+<!-- Plugin state saved. Plugin: "OdinMUSH_ASCII_Mapper". World: "Project Odin". -->
+
+<muclient>
+
+<!-- variables -->
+
+<variables
+   muclient_version="5.07-pre"
+   world_file_version="15"
+  >
+  <variable name="body_font_name">FiraMono Nerd Font</variable>
+  <variable name="body_font_size">20</variable>
+  <variable name="font_name">@Fixedsys Excelsior</variable>
+  <variable name="font_size">12</variable>
+  <variable name="mw_testwindow2_windowx">1719</variable>
+  <variable name="mw_testwindow2_windowy">0</variable>
+  <variable name="themed_miniwindow_heighttestwindow2">516</variable>
+  <variable name="themed_miniwindow_widthtestwindow2">515</variable>
+  <variable name="win_height">112</variable>
+  <variable name="win_width">112</variable>
+</variables>
+</muclient>

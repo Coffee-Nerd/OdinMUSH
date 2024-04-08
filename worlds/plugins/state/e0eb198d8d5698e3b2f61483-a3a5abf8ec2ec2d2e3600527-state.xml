@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- MuClient version 5.07-pre -->
+<!-- Written by Nick Gammon -->
+<!-- Home Page: http://www.mushclient.com/ -->
+
+<!-- Plugin state saved. Plugin: "AARDWOLF_Discord". World: "Project Odin". -->
+
+<muclient>
+
+<!-- variables -->
+
+<variables
+   muclient_version="5.07-pre"
+   world_file_version="15"
+  >
+  <variable name="Socials">names = {}
+  names["609275797475164161"] = "Demon"</variable>
+  <variable name="names">names = {}
+  names["376719727315124224"] = "Quad"
+  names["609275797475164161"] = "Demon"</variable>
+  <variable name="simulated">yes</variable>
+</variables>
+</muclient>
