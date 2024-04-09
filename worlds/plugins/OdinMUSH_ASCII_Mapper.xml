@@ -76,13 +76,25 @@ end
 	ignore_case="y"><send>
      util.print("@RA help page will go here eventually.")
 </send></alias>
+<alias
+    sequence="100"
+    match="ascii toggle output"
+    enabled="y"
+    send_to="12"
+    ignore_case="y">
+    <send>
+        toggleOmitFromOutput()
+    </send>
+</alias>
 </aliases>
 <triggers>
 <trigger
+    name="map_start"
     sequence="100"
     match="^{map_start}$"
     enabled="y"
     regexp="y"
+    omit_from_output="y"
     send_to="12"
     ignore_case="y"
     >
@@ -97,6 +109,7 @@ end
     match="*"
     enabled="n"
     regexp="n"
+    omit_from_output="y"
     send_to="12"
     ignore_case="y"
     script="catchMap"
@@ -106,9 +119,11 @@ end
     </send>
     </trigger>
 <trigger
+    name="map_end"
     sequence="99"
     match="^{map_end}$"
     enabled="y"
+    omit_from_output="y"
     regexp="y"
     send_to="12"
     ignore_case="y"
@@ -202,6 +217,21 @@ function catchMap(name, line, wildcards, styles)
     end
     my_window:draw()
 end
+
+function toggleOmitFromOutput()
+    local triggers = {"map_start", "catchMap", "map_end"}
+    for _, triggerName in ipairs(triggers) do
+        local currentValue = GetTriggerOption(triggerName, "omit_from_output")
+        if currentValue == "1" then
+            SetTriggerOption(triggerName, "omit_from_output", "0")
+        else
+            SetTriggerOption(triggerName, "omit_from_output", "1")
+        end
+        local newValue = GetTriggerOption(triggerName, "omit_from_output")
+        print("Trigger: " .. triggerName .. " Omit from output: " .. newValue)
+    end
+end
+
 </script>
 
 </muclient>
