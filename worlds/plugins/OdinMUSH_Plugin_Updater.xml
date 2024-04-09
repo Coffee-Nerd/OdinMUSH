@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
 
 <muclient>
@@ -11,7 +11,7 @@
    save_state="y"
    date_written="2022-10-24 00:00:00"
    requires="4.00"
-   version="2.07"
+   version="2.08"
    >
 
 </plugin>
@@ -474,7 +474,6 @@ function raw_get_cache(retval, page, status, headers, full_status, request_url)
         pluginId = string.match(page, '%s+id="(%w+)"')
         purpose = string.match(page, '%s+purpose="([^"]+)"')
         localVersion = GetPluginInfo(pluginId, 19)
-        print("Local Version ".. localVersion)
         localName = script_directory.. rawName.. ".xml"
         hpmVar["cache"][pluginId] = {}
     else
