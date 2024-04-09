@@ -1,2 +1,7 @@
 /db_backups
 /logs
+/worlds/plugins/state
+mushclient_prefs.sqlite
+mushclient.cnt
+MUSHclient.ini
+/worlds/OdinMUSH.mcl
