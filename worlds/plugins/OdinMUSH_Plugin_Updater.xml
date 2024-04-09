@@ -11,7 +11,7 @@
    save_state="y"
    date_written="2022-10-24 00:00:00"
    requires="4.00"
-   version="2.02"
+   version="2.04"
    >
 
 </plugin>
@@ -53,7 +53,7 @@
      </alias>
      <alias
      script="installPlugin"
-     match="^#installPlugin ([0-9a-zA-Z]+)$"
+     match="^installPlugin ([0-9a-zA-Z]+)$"
      enabled="y"
      regexp="y"
      sequence="100"
@@ -110,7 +110,7 @@ function OnPluginInstall ()
 		return
 	end 
 	
-	utilprint("Use pru helpfor help regarding the updater - this notification will look better in the future","script")
+	utilprint("Use pru help for help regarding the updater - this notification will look better in the future","script")
   
 	OnPluginEnable ()
 end
@@ -181,29 +181,6 @@ function pmMain(l, m, wc)
      end
      
 end
-
--- Updated buildOutput function
-    function buildOutput(retval, page, status, headers, full_status, request_url, build_res, build_Len)
-        local pluginId, ghName
-        
-        print("Status Code: ", status)  -- Debugging line
-        print("Headers: ", headers)  -- Debugging line
-        print("Full Status: ", full_status)  -- Debugging line
-        
-        if status == 200 then
-            ghName = getName(page, true)
-            pluginId = string.match(page, '%s+id="(%w+)"')
-        else
-            print("Request URL: ", request_url)  -- Debugging line
-            utilprint("Cant connect to github", "error")
-            return
-        end
-        
-        build_res = build_res + 1
-        
-        renderPluginInfo(build_res, build_Len, ghName, pluginId)
-    end
-    
     
 -- Global variables
 build_Len = 0
@@ -373,10 +350,17 @@ end
 
 function loadVariables(wc)
     local script_id = wc[1]
-    local script_name = hpmVar["cache"][script_id]["localName"]
-    local script_url = hpmVar["cache"][script_id]["url"]
-    local script_pid = hpmVar["cache"][script_id]["pluginId"]
-    return script_id, script_name, script_url, script_pid
+    -- Check if the cache entry exists
+    if hpmVar["cache"][script_id] then
+        local script_name = hpmVar["cache"][script_id]["localName"]
+        local script_url = hpmVar["cache"][script_id]["url"]
+        local script_pid = hpmVar["cache"][script_id]["pluginId"]
+
+        return script_id, script_name, script_url, script_pid
+    else
+        print("Error: Cache entry for script_id not found.")
+        return nil
+    end
 end
 
 function handleAsyncRequest(script_url, script_name)
@@ -408,7 +392,7 @@ function installPlugin(name, line, wc)
     local script_id, script_name, script_url, script_pid = loadVariables(wc)
     utilprint("@x238Installing Plugin @Y" .. hpmVar["cache"][script_id]["shortName"] .. "@w", "script")
     local status = handleAsyncRequest(script_url, script_name)
-    utilprint("Plugin @Y" .. hpmVar["cache"][script_id]["shortName"] .. "@x238 Installed... Enjoy!", "script")
+    utilprint("@x238Plugin @Y" .. hpmVar["cache"][script_id]["shortName"] .. "@x238 Installed... Enjoy!", "script")
     LoadPlugin(script_name)
 end
 function reloadPlugin(name, line, wc)
@@ -481,6 +465,7 @@ end
 
 function raw_get_cache(retval, page, status, headers, full_status, request_url)
     local webName, rawName, webVersion, pluginId, localVersion, localName
+    local script_directory = GetInfo(60)
     
     if status == 200 then
         webName = getName(page, false)
@@ -489,7 +474,7 @@ function raw_get_cache(retval, page, status, headers, full_status, request_url)
         pluginId = string.match(page, '%s+id="(%w+)"')
         purpose = string.match(page, '%s+purpose="([^"]+)"')
         localVersion = GetPluginInfo(pluginId, 19)
-        localName = GetPluginInfo(pluginId, 6)
+        localName = script_directory.. rawName.. ".xml"
         hpmVar["cache"][pluginId] = {}
     else
         utilprint("Can't connect to GitHub", "error")
@@ -504,7 +489,7 @@ function raw_get_cache(retval, page, status, headers, full_status, request_url)
         webVersion = webVersion,
         pluginId = pluginId,
         localVersion = localVersion,
-        lname = localName,
+        localName = localName,
         url = request_url,
         purpose = purpose
     }
