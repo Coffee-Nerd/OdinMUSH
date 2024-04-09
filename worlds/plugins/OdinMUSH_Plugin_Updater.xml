@@ -11,7 +11,7 @@
    save_state="y"
    date_written="2022-10-24 00:00:00"
    requires="4.00"
-   version="2.0"
+   version="2.02"
    >
 
 </plugin>
@@ -361,14 +361,14 @@ end
 
 
 
-function getName(Data,p)
-     local name
-     if p then
-          name = string.upper(string.gsub(string.match(Data, '%s+name="ProceduralMUSH?_([%w_]+)"'),"_"," "))
-     else
-          name = string.match(Data, '%s+name="ProceduralMUSH?_([%w_]+)"')
-     end
-        return name
+function getName(Data, p)
+    local name
+    if p then
+        name = string.upper(string.gsub(string.match(Data, '%s+name="OdinMUSH?_([%w_]+)"'), "_", " "))
+    else
+        name = string.match(Data, '%s+name="OdinMUSH?_([%w_]+)"')
+    end
+    return name
 end
 
 function loadVariables(wc)
@@ -512,7 +512,7 @@ end
 
 
 function updatePluginThis()
-     raw = "https://raw.githubusercontent.com/AsmodeusBrooding/ProceduralMUSH-Updater/main/PluginManager/ProceduralMUSH_Updater.xml"
+     raw = "https://raw.githubusercontent.com/Coffee-Nerd/OdinMUSH/main/worlds/plugins/OdinMUSH_Plugin_Updater.xml"
      async_ok, async = pcall (require, "async")
      if async_ok then
           plugin_page = async.doAsyncRemoteRequest(raw, Raw_Update, "HTTPS")
