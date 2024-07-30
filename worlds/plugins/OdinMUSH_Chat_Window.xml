@@ -908,8 +908,8 @@ end
 function OnPluginBroadcast(msg, id, name, text)
    -- Look for GMCP handler.
    if (id == '3e7dedbe37e44942dd46d264') then
-      if (text == "com.chan") then
-         local gmcpcomm = gmcp("com.chan")
+      if (text == "comm.chan") then
+         local gmcpcomm = gmcp("comm.chan")
          local msg_text = gmcpcomm.msg or ""
          local chan = gmcpcomm.chan or ""
          local player = gmcpcomm.player or ""
