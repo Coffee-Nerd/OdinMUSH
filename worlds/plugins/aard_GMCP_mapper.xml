@@ -2205,7 +2205,6 @@ function load_room_from_database (uid)
    -- room not found in database
    room_not_in_database [u] = true
    return nil
-
 end -- load_room_from_database
 
 function create_tables ()
@@ -3871,60 +3870,68 @@ end
 
 lastarea = ""
 function got_gmcp_room()
-   local room_number = gmcpval("num")
-   if not(room_number) then
-      return
+--   print("got room")
+   local room_number = gmcpval("id")
+  -- room_number = string.gsub(room_number, ".-[_-]", "")
+--   print("Processed room number:", room_number)
+   
+   if not room_number then
+       return
    end
 
    if current_room_is_cont ~= (gmcpval("coord.cont") == "1") then
-      current_room_is_cont = (gmcpval("coord.cont") == "1")
-      mapper.halt_drawing(bigmap_override and current_room_is_cont)
+       current_room_is_cont = (gmcpval("coord.cont") == "1")
+       mapper.halt_drawing(bigmap_override and current_room_is_cont)
    end
 
    gmcproom = {
-      name = strip_colours(gmcpval("name")),
-      area = gmcpval("zone"),
-      building = 0,
-      terrain = gmcpval("terrain"),
-      info = gmcpval("details"),
-      notes = "",
-      x = gmcpval("coord.x"),
-      y = gmcpval("coord.y"),
-      z = 0,
-      exits = {},
-      exit_locks = {}
+       name = strip_colours(gmcpval("name")),
+       area = gmcpval("zone"),
+       building = 0,
+       terrain = gmcpval("terrain"),
+       info = gmcpval("details") or "",
+       notes = "",
+       z = 0,
+       exits = {},
+       exit_locks = {}
    }
    if gmcproom.area ~= lastarea then
-      lastarea = gmcproom.area
-      -- purge all virtual areas except the current area
-      for k,v in pairs(areas) do
-         if v.virtual and (k ~= lastarea) then
-            purgezone(k)
-         end
-      end
+       lastarea = gmcproom.area
+       -- purge all virtual areas except the current area
+       for k,v in pairs(areas) do
+           if v.virtual and (k ~= lastarea) then
+               purgezone(k)
+           end
+       end
    end
 
-   -- Try to accomodate closed clan rooms and other nomap rooms.
-   -- We'll have to make some other changes elsewhere as well.
+   -- Try to accommodate closed clan rooms and other nomap rooms.
    if room_number == "-1" then
-      room_number = "nomap_"..gmcproom.name.."_"..gmcproom.area
+       room_number = "nomap_" .. gmcproom.name .. "_" .. gmcproom.area
    end
 
    current_room = room_number
 
    local area_exists = false
-   for n in dbnrowsWRAPPER (string.format ("SELECT uid FROM areas where uid=%s", fixsql(gmcproom.area))) do
-      area_exists = true
+   for n in dbnrowsWRAPPER(string.format("SELECT uid FROM areas WHERE uid=%s", fixsql(gmcproom.area))) do
+       area_exists = true
    end
-   if not area_exists and last_area_requested ~= gmcproom.area then
-      last_area_requested = gmcproom.area
-      Send_GMCP_Packet("request area")
+--   print("Area exists:", area_exists)
+   if not area_exists then
+       if last_area_requested ~= gmcproom.area then
+           last_area_requested = gmcproom.area
+           Send_GMCP_Packet("request area")
+       end
+       -- Ensure the area is added to the database
+       local area_sql = string.format("INSERT OR IGNORE INTO areas (uid, name) VALUES (%s, %s);", fixsql(gmcproom.area), fixsql(gmcproom.area))
+--       print("Inserting new area:", area_sql)
+       dbCheckExecute(area_sql)
    end
 
-   local room = rooms [room_number]
-   -- not cached - see if in database
+   local room = rooms[room_number]
+   -- Not cached - see if in database
    if not room then
-      room = load_room_from_database (room_number)
+       room = load_room_from_database(room_number)
    end -- not in cache
 
    local check_compact = ""
@@ -3934,7 +3941,6 @@ function got_gmcp_room()
       Simulate(ColoursToANSI("@x033*** MAPPER NOTE *** -> "..room.notes.."@w\r\n"..check_compact))
    end
 
-   -- re-save if we got information that is different than before
    local same_exits = ((room and compareTables(gmcpdata.exits, room.exits)) or false)
    if room and room.ignore_exits_mismatch and not same_exits then
       same_exits = true
@@ -3942,64 +3948,49 @@ function got_gmcp_room()
    end
    local same_area = ((room and (nilToStr(room.area) == nilToStr(gmcproom.area))) or false)
    if not room or nilToStr(room.name) ~= nilToStr(gmcproom.name) or
-                  nilToStr(room.terrain) ~= nilToStr(gmcproom.terrain) or
-                  nilToStr(room.info) ~= nilToStr(gmcproom.info) or
-                  same_area == false or
-                  same_exits == false then
-      if same_area then
---          print("same area")
---          if room then
---             print("ROOM")
---             tprint(room)
---          end
---          print("GMCPROOM")
---          tprint(gmcproom)
+                 nilToStr(room.terrain) ~= nilToStr(gmcproom.terrain) or
+                 nilToStr(room.info) ~= nilToStr(gmcproom.info) or
+                 same_area == false or
+                 same_exits == false then
+       if same_area then
+           gmcproom.exits = (room.exits or {})
+           gmcproom.exit_locks = (room.exit_locks or {})
+           gmcproom.notes = nilToStr(room.notes)
+           gmcproom.noportal = (room.noportal or 0)
+           gmcproom.norecall = (room.norecall or 0)
+       elseif room and nilToStr(room.area) ~= "" and areas[nilToStr(room.area)] then
+           mapper.mapprint("This room has moved areas. You should 'mapper purgezone " .. nilToStr(room.area) .. "' if this new area replaces it.")
+           map_purgeroom(nilToStr(room_number), gmcproom.area)
+       else
+           -- brand new area
+           gmcproom.exits = {}
+           gmcproom.exit_locks = {}
+           gmcproom.notes = ""
+           gmcproom.noportal = 0
+           gmcproom.norecall = 0
+       end
+       dbCheckExecute("BEGIN TRANSACTION;")
+--       print(room_number)
+--       tprint(gmcproom)
+       local success = save_room_to_database(room_number, gmcproom)
+       if success then
+           rooms[room_number] = gmcproom
+           if not same_exits or not same_area then
+               save_room_exits(room_number)
+           end
+       end
+       dbCheckExecute("COMMIT;")
 
-         gmcproom.exits = (room.exits or {})
-         gmcproom.exit_locks = (room.exit_locks or {})
-         gmcproom.notes = nilToStr(room.notes)
-         gmcproom.noportal = (room.noportal or 0)
-         gmcproom.norecall = (room.norecall or 0)
-      elseif room and nilToStr(room.area) ~= "" and areas[nilToStr(room.area)] then
-         -- replacement area
---         print("different area")
---         if room then
---            print("ROOM")
---            tprint(room)
---         end
---         print("GMCPROOM")
---         tprint(gmcproom)
-
-         mapper.mapprint("This room has moved areas. You should 'mapper purgezone "..nilToStr(room.area).."' if this new area replaces it.")
-         map_purgeroom (nilToStr(room_number), gmcproom.area)
-      else
-         -- brand new area
---         print("new area")
-         gmcproom.exits = {}
-         gmcproom.exit_locks = {}
-         gmcproom.notes = ""
-         gmcproom.noportal = 0
-         gmcproom.norecall = 0
-      end
-      dbCheckExecute("BEGIN TRANSACTION;")
-      local success = save_room_to_database(room_number, gmcproom)
-      if success then
-         rooms[room_number] = gmcproom
-         if not same_exits or not same_area then
-            save_room_exits(room_number)
-         end
-      end
-      dbCheckExecute("COMMIT;")
-
-      if not success then
-         return
-      end
+       if not success then
+           print("This room didn't save to the database. Please contact an admin about this issue.")
+           return
+       end
    end -- if room not there
 
    mapper.draw(room_number)
 
    if expected_exit == "0" and from_room then
-      fix_up_exit ()
+       fix_up_exit()
    end -- exit was wrong
 
    return
@@ -4102,9 +4093,9 @@ function OnPluginBroadcast (msg, id, name, text)
          return
       end
 
-      if (text == "room.info") then
+      if (text == "char.roominfo") then
          blinded = false
-         res, gmcparg = CallPlugin("3e7dedbe37e44942dd46d264","gmcpval","room.info")
+         res, gmcparg = CallPlugin("3e7dedbe37e44942dd46d264","gmcpval","char.roominfo")
          luastmt = "gmcpdata = " .. gmcparg
          assert (loadstring (luastmt or "")) ()
          got_gmcp_room()
