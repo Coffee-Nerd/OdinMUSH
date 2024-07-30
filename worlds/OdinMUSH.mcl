@@ -25,7 +25,7 @@
    site="the-accursed.com"
    spam_message="look"
    speed_walk_prefix="#"
-   terminal_identification="MUSHclient-Aard"
+   terminal_identification="MUSHclient-Odin"
 
    arrows_change_history="y"
    auto_pause="y"
@@ -483,12 +483,11 @@ ColourNote("white", "green", "Added trigger "..(("%4" ~= "") and "to group '%4' 
 <include name="aard_miniwindow_z_order_monitor.xml" plugin="y" />
 <include name="aard_Copy_Colour_Codes.xml" plugin="y" />
 <include name="aard_Theme_Controller.xml" plugin="y" />
-<include name="aard_layout.xml" plugin="y" />
 <include name="aard_health_bars_gmcp.xml" plugin="y" />
-<include name="OdinMUSH_Builder_Helper.xml" plugin="y" />
 <include name="OdinMUSH_Repaint_Buffer.xml" plugin="y" />
 <include name="OdinMUSH_ASCII_Mapper.xml" plugin="y" />
-<include name="Hyperlink_URL2.xml" plugin="y" />
 <include name="OdinMUSH_Plugin_Updater.xml" plugin="y" />
+<include name="OdinMUSH_layout.xml" plugin="y" />
+<include name="OdinMUSH_GMCP_Mapper.xml" plugin="y" />
+<include name="Hyperlink_URL2.xml" plugin="y" />
 </muclient>
-
